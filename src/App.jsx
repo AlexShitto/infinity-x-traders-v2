@@ -262,7 +262,7 @@ function TextInput({ value, onChange, placeholder, type = "text", required = fal
 function AuthScreen({ onAuthSuccess, authError }) {
   const [mode, setMode] = useState("signin");
   const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState(ADMIN_EMAIL);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState(authError || "");
