@@ -798,22 +798,201 @@ function SignalHub({
   );
 }
 
-function CommunityHub() {
+function CommunityHub({ groups = [], role = "Public" }) {
+  const defaultGroups = [
+    {
+      id: "main-hub",
+      title: "Main Hub",
+      description: "Announcements, onboarding, rules, platform updates, and general member support.",
+      access_level: "all",
+      discord_url: "",
+      is_active: true,
+    },
+    {
+      id: "market-matrix",
+      title: "Market Matrix",
+      description: "Liquidity maps, session bias, fakeout probability, XAUUSD analysis, and market structure planning.",
+      access_level: "vip_elite",
+      discord_url: "",
+      is_active: true,
+    },
+    {
+      id: "inner-mastery-team",
+      title: "Inner Mastery Team",
+      description: "Advanced psychology, execution discipline, high-level reviews, and elite trader development.",
+      access_level: "vip_elite",
+      discord_url: "",
+      is_active: true,
+    },
+    {
+      id: "arbitrage-traders",
+      title: "Arbitrage Traders",
+      description: "Arbitrage ideas, Leg 1 / Leg 2 / Flow 3 opportunities, spread notes, and execution planning.",
+      access_level: "vip_elite",
+      discord_url: "",
+      is_active: true,
+    },
+    {
+      id: "indicators-ea-group",
+      title: "Indicators and EA Group",
+      description: "TradingView scripts, MT5 tools, EA testing, automation ideas, and indicator feedback.",
+      access_level: "vip_elite",
+      discord_url: "",
+      is_active: true,
+    },
+    {
+      id: "education-groups",
+      title: "Education Groups",
+      description: "Beginner, intermediate, and advanced education paths for members learning the system.",
+      access_level: "all",
+      discord_url: "",
+      is_active: true,
+    },
+    {
+      id: "elite-circle",
+      title: "Elite Circle",
+      description: "Private VIP Elite room for early forecast zones, private breakdowns, and priority insights.",
+      access_level: "vip_elite",
+      discord_url: "",
+      is_active: true,
+    },
+    {
+      id: "beta-testers",
+      title: "Beta Testers",
+      description: "Members testing new dashboard tools, app features, automation ideas, and signal engine feedback.",
+      access_level: "all",
+      discord_url: "",
+      is_active: true,
+    },
+  ];
+
+  const [selectedGroup, setSelectedGroup] = useState(null);
+
+  const rows = groups.length > 0 ? groups : defaultGroups;
+
+  function canView(group) {
+    if (role === "Admin") return true;
+    if (group.access_level === "all") return true;
+    if (group.access_level === "free" && role === "Free Member") return true;
+    if (group.access_level === "vip_elite" && role === "VIP Elite") return true;
+    return false;
+  }
+
+  const visibleGroups = rows.filter((group) => group.is_active !== false).filter(canView);
+
+  if (selectedGroup) {
+    return (
+      <div className="space-y-5">
+        <Card className="border-[#58ff45]/25">
+          <Button variant="ghost" onClick={() => setSelectedGroup(null)}>
+            ← Back to Community Hub
+          </Button>
+
+          <div className="mt-6 inline-flex rounded-full border border-[#58ff45]/30 bg-[#58ff45]/10 px-3 py-1 text-xs font-bold text-[#b8ffb0]">
+            {selectedGroup.access_level === "vip_elite"
+              ? "VIP Elite Room"
+              : selectedGroup.access_level === "free"
+              ? "Free Member Room"
+              : selectedGroup.access_level === "admin"
+              ? "Admin Room"
+              : "All Members"}
+          </div>
+
+          <h3 className="mt-4 text-4xl font-black text-white">
+            {selectedGroup.title}
+          </h3>
+
+          <p className="mt-3 max-w-3xl text-slate-400">
+            {selectedGroup.description}
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            {selectedGroup.discord_url ? (
+              <Button
+                onClick={() =>
+                  window.open(selectedGroup.discord_url, "_blank", "noopener,noreferrer")
+                }
+              >
+                Open Discord Room
+              </Button>
+            ) : (
+              <Button variant="ghost" disabled>
+                Discord link not added yet
+              </Button>
+            )}
+          </div>
+        </Card>
+
+        <div className="grid gap-5 md:grid-cols-3">
+          <Card>
+            <h4 className="text-xl font-black text-white">Room Purpose</h4>
+            <p className="mt-3 text-sm leading-6 text-slate-400">
+              This room is built to keep members focused, organized, and connected around {selectedGroup.title}.
+            </p>
+          </Card>
+
+          <Card>
+            <h4 className="text-xl font-black text-white">Member Access</h4>
+            <p className="mt-3 text-sm leading-6 text-slate-400">
+              Access level: {selectedGroup.access_level}. Only eligible users should see this room.
+            </p>
+          </Card>
+
+          <Card>
+            <h4 className="text-xl font-black text-white">Next Action</h4>
+            <p className="mt-3 text-sm leading-6 text-slate-400">
+              Add your Discord invite link in Supabase so members can enter the live community room.
+            </p>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Card>
       <h3 className="text-2xl font-black text-white">Community Hub</h3>
       <p className="mt-1 text-slate-400">
-        Main Hub, Market Matrix, sub-communities, exclusive groups, and recognition.
+        Main Hub, Market Matrix, sub-communities, exclusive groups, and member rooms.
       </p>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {communityCards.map(([title, note]) => (
-          <div key={title} className="rounded-3xl border border-white/10 bg-black/30 p-5">
+        {visibleGroups.map((group) => (
+          <button
+            key={group.id}
+            type="button"
+            onClick={() => setSelectedGroup(group)}
+            className="rounded-3xl border border-white/10 bg-black/30 p-5 text-left transition hover:border-[#58ff45]/40 hover:bg-[#58ff45]/10"
+          >
             <Users className="text-[#58ff45]" size={22} />
-            <h4 className="mt-4 font-black text-white">{title}</h4>
-            <p className="mt-2 text-sm leading-6 text-slate-400">{note}</p>
-          </div>
+
+            <div className="mt-4 inline-flex rounded-full border border-[#58ff45]/30 bg-[#58ff45]/10 px-3 py-1 text-xs font-bold text-[#b8ffb0]">
+              {group.access_level === "vip_elite"
+                ? "VIP Elite"
+                : group.access_level === "free"
+                ? "Free"
+                : group.access_level === "admin"
+                ? "Admin"
+                : "All Members"}
+            </div>
+
+            <h4 className="mt-4 font-black text-white">{group.title}</h4>
+
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              {group.description}
+            </p>
+
+            <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center text-xs font-black text-[#b8ffb0]">
+              Open Room
+            </div>
+          </button>
         ))}
+
+        {visibleGroups.length === 0 ? (
+          <div className="rounded-3xl border border-white/10 bg-black/30 p-5 text-slate-400">
+            No community groups available for this role yet.
+          </div>
+        ) : null}
       </div>
     </Card>
   );
@@ -1546,7 +1725,260 @@ function AdminPanel({
     </div>
   );
 }
+function CommunityManagerPage({ groups = [], onUpdated }) {
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    access_level: "all",
+    discord_url: "",
+    sort_order: "1",
+    is_active: true,
+  });
 
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  function updateField(name, value) {
+    setForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  }
+
+  async function createGroup(event) {
+    event.preventDefault();
+
+    setBusy(true);
+    setMessage("");
+    setErrorMessage("");
+
+    try {
+      const payload = {
+        title: form.title,
+        description: form.description,
+        access_level: form.access_level,
+        discord_url: form.discord_url,
+        sort_order: Number(form.sort_order || 0),
+        is_active: form.is_active,
+      };
+
+      const { error } = await supabase.from("community_groups").insert(payload);
+
+      if (error) throw error;
+
+      setMessage("Community group created successfully.");
+
+      setForm({
+        title: "",
+        description: "",
+        access_level: "all",
+        discord_url: "",
+        sort_order: "1",
+        is_active: true,
+      });
+
+      await onUpdated?.();
+    } catch (error) {
+      setErrorMessage(error.message || "Could not create community group.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function toggleActive(group) {
+    setBusy(true);
+    setMessage("");
+    setErrorMessage("");
+
+    try {
+      const { error } = await supabase
+        .from("community_groups")
+        .update({ is_active: !group.is_active })
+        .eq("id", group.id);
+
+      if (error) throw error;
+
+      setMessage(
+        group.is_active
+          ? "Community group hidden."
+          : "Community group activated."
+      );
+
+      await onUpdated?.();
+    } catch (error) {
+      setErrorMessage(error.message || "Could not update community group.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteGroup(group) {
+    const confirmDelete = window.confirm(`Delete ${group.title}?`);
+
+    if (!confirmDelete) return;
+
+    setBusy(true);
+    setMessage("");
+    setErrorMessage("");
+
+    try {
+      const { error } = await supabase
+        .from("community_groups")
+        .delete()
+        .eq("id", group.id);
+
+      if (error) throw error;
+
+      setMessage("Community group deleted.");
+      await onUpdated?.();
+    } catch (error) {
+      setErrorMessage(error.message || "Could not delete community group.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      <Card className="border-[#58ff45]/25">
+        <h3 className="text-3xl font-black text-white">Community Manager</h3>
+        <p className="mt-2 text-slate-400">
+          Create and manage community rooms, Discord groups, VIP rooms, and public member hubs.
+        </p>
+      </Card>
+
+      <Card>
+        <h4 className="text-2xl font-black text-white">Create Community Group</h4>
+
+        <form onSubmit={createGroup} className="mt-6 grid gap-4 md:grid-cols-2">
+          <TextInput
+            value={form.title}
+            onChange={(value) => updateField("title", value)}
+            placeholder="Group title e.g. Gold Traders Room"
+            required
+          />
+
+          <select
+            value={form.access_level}
+            onChange={(event) => updateField("access_level", event.target.value)}
+            className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none"
+          >
+            <option value="all">All Members</option>
+            <option value="free">Free Members</option>
+            <option value="vip_elite">VIP Elite</option>
+            <option value="admin">Admin Only</option>
+          </select>
+
+          <TextInput
+            value={form.discord_url}
+            onChange={(value) => updateField("discord_url", value)}
+            placeholder="Discord / community link"
+          />
+
+          <TextInput
+            value={form.sort_order}
+            onChange={(value) => updateField("sort_order", value)}
+            placeholder="Sort order e.g. 1"
+          />
+
+          <textarea
+            value={form.description}
+            onChange={(event) => updateField("description", event.target.value)}
+            className="min-h-28 rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none md:col-span-2"
+            placeholder="Describe this community group..."
+          />
+
+          <label className="flex items-center gap-3 text-sm text-slate-300 md:col-span-2">
+            <input
+              type="checkbox"
+              checked={form.is_active}
+              onChange={(event) => updateField("is_active", event.target.checked)}
+            />
+            Active and visible
+          </label>
+
+          {errorMessage ? (
+            <div className="rounded-2xl border border-rose-400/30 bg-rose-500/10 p-3 text-sm text-rose-200 md:col-span-2">
+              {errorMessage}
+            </div>
+          ) : null}
+
+          {message ? (
+            <div className="rounded-2xl border border-[#58ff45]/30 bg-[#58ff45]/10 p-3 text-sm text-[#b8ffb0] md:col-span-2">
+              {message}
+            </div>
+          ) : null}
+
+          <div className="md:col-span-2">
+            <Button type="submit" disabled={busy}>
+              {busy ? "Saving..." : "Create Community Group"}
+            </Button>
+          </div>
+        </form>
+      </Card>
+
+      <Card>
+        <h4 className="text-2xl font-black text-white">Existing Community Groups</h4>
+
+        <div className="mt-6 grid gap-4">
+          {groups.map((group) => (
+            <div
+              key={group.id}
+              className="rounded-2xl border border-white/10 bg-black/30 p-4"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <div className="inline-flex rounded-full border border-[#58ff45]/30 bg-[#58ff45]/10 px-3 py-1 text-xs font-bold text-[#b8ffb0]">
+                    {group.access_level} · {group.is_active ? "active" : "hidden"}
+                  </div>
+
+                  <h5 className="mt-3 text-xl font-black text-white">
+                    {group.title}
+                  </h5>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                    {group.description}
+                  </p>
+
+                  {group.discord_url ? (
+                    <p className="mt-2 text-xs text-slate-500">
+                      Link: {group.discord_url}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="ghost"
+                    disabled={busy}
+                    onClick={() => toggleActive(group)}
+                  >
+                    {group.is_active ? "Hide" : "Show"}
+                  </Button>
+
+                  <Button
+                    variant="danger"
+                    disabled={busy}
+                    onClick={() => deleteGroup(group)}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {groups.length === 0 ? (
+            <p className="text-sm text-slate-500">
+              No community groups created yet.
+            </p>
+          ) : null}
+        </div>
+      </Card>
+    </div>
+  );
+}
 function SimplePage({ title, description, children }) {
   return (
     <div className="space-y-5">
@@ -1570,6 +2002,7 @@ export default function App() {
   const [users, setUsers] = useState([]);
   const [payments, setPayments] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [communityGroups, setCommunityGroups] = useState([]);
 
   const role = useMemo(() => getAllowedRole(profile, session), [profile, session]);
   useEffect(() => {
@@ -1732,10 +2165,27 @@ export default function App() {
     setNotifications(data || []);
     return data || [];
   }
+  async function loadCommunityGroups() {
+  const { data, error } = await supabase
+    .from("community_groups")
+    .select("*")
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Community groups load error:", error);
+    setCommunityGroups([]);
+    return [];
+  }
+
+  setCommunityGroups(data || []);
+  return data || [];
+}
 
   async function refreshForRole(currentProfile) {
     await loadSignals();
     await loadNotifications();
+    await loadCommunityGroups();
 
     if (currentProfile?.role === "admin" || currentProfile?.email === ADMIN_EMAIL) {
       await loadUsers();
@@ -1943,7 +2393,8 @@ export default function App() {
         setActive,
       };
 
-      if (active === "Community Manager") return <CommunityHub />;
+      if (active === "Community Manager")
+        return <CommunityManagerPage groups={communityGroups} onUpdated={loadCommunityGroups} />;
       if (active === "Signal Manager") return <AdminPanel title="Signal Manager" {...adminProps} />;
       if (active === "Subscription Manager") return <AdminPanel title="Subscription Manager" {...adminProps} />;
       if (active === "Broadcast Centre") return <AdminPanel title="Broadcast Centre" {...adminProps} />;
@@ -1965,7 +2416,7 @@ export default function App() {
     }
 
     if (role === "VIP Elite") {
-      if (active === "Community Hub") return <CommunityHub />;
+      if (active === "Community Hub") return <CommunityHub groups={communityGroups} role={role} />
       if (active === "Signal Hub") return <SignalHub signals={signals} setActive={setActive} />;
       if (active === "Market Matrix") {
   return (
@@ -1986,7 +2437,7 @@ export default function App() {
     }
 
     if (role === "Free Member") {
-      if (active === "Community Hub") return <CommunityHub />;
+      if (active === "Community Hub") return <CommunityHub groups={communityGroups} role={role} />
       if (active === "Beginner Education") return <SimplePage title="Beginner Education" description="Free learning path." />;
 
       if (active === "Upgrade") {
@@ -2000,7 +2451,7 @@ export default function App() {
       return <Dashboard role={role} locked signals={signals} setActive={setActive} />;
     }
 
-    if (active === "Community") return <CommunityHub />;
+    if (active === "Community") return <CommunityHub groups={communityGroups} role={role} />
     if (active === "Pricing") return <SimplePage title="Pricing" description="Free, VIP Monthly, and VIP Elite plans." />;
     if (active === "Education") return <SimplePage title="Education" description="Beginner public education." />;
     if (active === "Market Preview") return <Dashboard role="Public" locked signals={signals} setActive={setActive} />;
